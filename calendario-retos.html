@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Retos - JS & UX/UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .month-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .month-title {
+            font-size: 1.8rem;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .challenges-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .challenge-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+            position: relative;
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .challenge-card.completed {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            border-left-color: #4caf50;
+            opacity: 0.8;
+        }
+
+        .challenge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .challenge-date {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.95rem;
+        }
+
+        .challenge-difficulty {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .difficulty-facil {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty-medio {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty-avanzado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .challenge-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .challenge-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .challenge-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .checkbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .month-title {
+                font-size: 1.5rem;
+            }
+
+            .challenge-title {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Calendario de Retos de Código</h1>
+            <p class="subtitle">Febrero - Abril 2026 | JS, UX/UI & Portafolio</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalChallenges">0</div>
+                <div class="stat-label">Retos Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedChallenges">0</div>
+                <div class="stat-label">Completados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="progressPercentage">0%</div>
+                <div class="stat-label">Progreso</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterChallenges('all')">Todos</button>
+            <button class="filter-btn" onclick="filterChallenges('facil')">Fácil</button>
+            <button class="filter-btn" onclick="filterChallenges('medio')">Medio</button>
+            <button class="filter-btn" onclick="filterChallenges('avanzado')">Avanzado</button>
+            <button class="filter-btn" onclick="filterChallenges('completed')">Completados</button>
+        </div>
+
+        <div id="calendar"></div>
+    </div>
+
+    <script>
+        const challenges = {
+            febrero: [
+                {
+                    date: "Lunes 17",
+                    title: "Botón de Toggle Dark/Light Mode",
+                    description: "Crea un botón que cambie entre modo oscuro y claro. Guarda la preferencia del usuario en localStorage para que persista al recargar.",
+                    difficulty: "facil",
+                    tags: ["CSS", "LocalStorage", "UX"]
+                },
+                {
+                    date: "Jueves 20",
+                    title: "Tarjetas de Producto con Hover Effects",
+                    description: "Diseña 3 tarjetas de producto con efectos visuales al hacer hover: zoom en imagen, aparición de botón 'Añadir al carrito', y transiciones suaves.",
+                    difficulty: "facil",
+                    tags: ["CSS Animations", "Flexbox", "UI Design"]
+                },
+                {
+                    date: "Viernes 21",
+                    title: "Temporizador Pomodoro",
+                    description: "Crea un temporizador de 25 minutos con pausa y reinicio. Incluye notificación visual/sonora cuando termine. Bonus: agregar sesiones de descanso cortas y largas.",
+                    difficulty: "medio",
+                    tags: ["setInterval", "DOM", "UX"]
+                },
+                {
+                    date: "Sábado 22",
+                    title: "Generador de Paletas de Color",
+                    description: "Crea una herramienta que genere paletas de 5 colores aleatorios. Permite copiar códigos hex al hacer clic. Bonus: generar paletas armoniosas usando teoría del color.",
+                    difficulty: "medio",
+                    tags: ["Color Theory", "Clipboard API", "Design"]
+                },
+                {
+                    date: "Lunes 24",
+                    title: "Menú Hamburguesa Animado",
+                    description: "Crea un menú responsive que se transforme en hamburguesa en móvil. Anima la transición del icono hamburguesa a X. Incluye overlay semitransparente.",
+                    difficulty: "facil",
+                    tags: ["Responsive", "CSS Transitions", "Mobile"]
+                },
+                {
+                    date: "Jueves 27",
+                    title: "Sistema de Tabs/Pestañas",
+                    description: "Implementa un sistema de pestañas para mostrar diferentes contenidos. Incluye animación de slide al cambiar. Debe ser accesible con teclado (Tab, Enter).",
+                    difficulty: "facil",
+                    tags: ["DOM Manipulation", "Accessibility", "UX"]
+                },
+                {
+                    date: "Viernes 28",
+                    title: "Validador de Formulario en Tiempo Real",
+                    description: "Crea un formulario de registro con validación en tiempo real: email, contraseña (8+ caracteres, mayúscula, número), confirmación de contraseña. Muestra mensajes de error/éxito.",
+                    difficulty: "medio",
+                    tags: ["Forms", "Regex", "UX Feedback"]
+                }
+            ],
+            marzo: [
+                {
+                    date: "Sábado 1",
+                    title: "Modal/Popup Reutilizable",
+                    description: "Diseña un modal elegante que pueda mostrar cualquier contenido. Incluye botón de cerrar, cerrar al hacer clic fuera, y cerrar con ESC. Bloquea scroll del body cuando esté abierto.",
+                    difficulty: "medio",
+                    tags: ["Components", "Event Listeners", "UX"]
+                },
+                {
+                    date: "Lunes 3",
+                    title: "Juego de Memoria (Memory Cards)",
+                    description: "Crea un juego donde el usuario voltea cartas para encontrar parejas. Rastrea intentos y tiempo. Incluye animación de volteo 3D con CSS.",
+                    difficulty: "medio",
+                    tags: ["Game Logic", "CSS 3D", "Arrays"]
+                },
+                {
+                    date: "Jueves 6",
+                    title: "Barra de Búsqueda con Autocompletado",
+                    description: "Implementa una barra de búsqueda que muestre sugerencias mientras escribes. Usa debouncing para optimizar. Navega sugerencias con flechas del teclado.",
+                    difficulty: "avanzado",
+                    tags: ["Debouncing", "Keyboard Events", "Performance"]
+                },
+                {
+                    date: "Viernes 7",
+                    title: "Calculadora con Historial",
+                    description: "Diseña una calculadora funcional (+, -, ×, ÷) con historial de operaciones que se pueda limpiar. Incluye teclas de teclado numérico y manejo de errores (división por 0).",
+                    difficulty: "medio",
+                    tags: ["Math Operations", "Event Handling", "UI"]
+                },
+                {
+                    date: "Sábado 8",
+                    title: "Galería de Imágenes con Lightbox",
+                    description: "Crea una galería responsive de imágenes. Al hacer clic, abre en lightbox con navegación (anterior/siguiente), zoom, y cerrar. Incluye lazy loading.",
+                    difficulty: "avanzado",
+                    tags: ["Image Optimization", "Lazy Loading", "Navigation"]
+                },
+                {
+                    date: "Lunes 10",
+                    title: "Control de Volumen Personalizado",
+                    description: "Diseña un slider de volumen con indicador visual (barras que se llenan). Cambia color según nivel. Incluye botón de mute/unmute que recuerda el volumen anterior.",
+                    difficulty: "facil",
+                    tags: ["Range Input", "CSS Variables", "Audio"]
+                },
+                {
+                    date: "Jueves 13",
+                    title: "To-Do List con Drag & Drop",
+                    description: "Crea una lista de tareas donde puedas reordenar items arrastrando. Incluye agregar, eliminar, marcar como completado, y filtros (todas/activas/completadas).",
+                    difficulty: "avanzado",
+                    tags: ["Drag & Drop API", "LocalStorage", "CRUD"]
+                },
+                {
+                    date: "Viernes 14",
+                    title: "Generador de Códigos QR",
+                    description: "Crea una herramienta que genere códigos QR a partir de texto/URL. Permite descargar la imagen. Incluye previsualización en tiempo real mientras escribes.",
+                    difficulty: "medio",
+                    tags: ["QR API", "Canvas", "Download"]
+                },
+                {
+                    date: "Sábado 15",
+                    title: "Juego de Piedra, Papel o Tijera",
+                    description: "Desarrolla el juego contra la computadora. Muestra puntuación, animación de elección, y efecto visual de ganador/perdedor. Incluye mejor de 5 rondas.",
+                    difficulty: "facil",
+                    tags: ["Game Logic", "Random", "Animations"]
+                },
+                {
+                    date: "Lunes 17",
+                    title: "Carrusel de Testimonios Automático",
+                    description: "Crea un carrusel que cambie automáticamente cada 5 segundos. Incluye controles manuales, indicadores de punto, y pausa al hacer hover. Debe ser responsive.",
+                    difficulty: "medio",
+                    tags: ["setInterval", "Touch Events", "Responsive"]
+                },
+                {
+                    date: "Jueves 20",
+                    title: "Reloj Analógico Funcional",
+                    description: "Diseña un reloj analógico con manecillas que se muevan en tiempo real. Incluye segundero con movimiento suave. Bonus: permitir cambiar entre diferentes zonas horarias.",
+                    difficulty: "medio",
+                    tags: ["Canvas/SVG", "Date Object", "Trigonometry"]
+                },
+                {
+                    date: "Viernes 21",
+                    title: "Página de Pricing con Toggle Anual/Mensual",
+                    description: "Crea una sección de precios con 3 planes. Incluye toggle para cambiar entre facturación mensual/anual con animación de precios. Resalta el plan recomendado.",
+                    difficulty: "medio",
+                    tags: ["Pricing UI", "Animations", "Business"]
+                },
+                {
+                    date: "Sábado 22",
+                    title: "Editor de Texto con Formato",
+                    description: "Implementa un editor tipo WYSIWYG básico: negrita, cursiva, subrayado, listas, alineación. Permite copiar HTML resultante. Usa contentEditable o execCommand.",
+                    difficulty: "avanzado",
+                    tags: ["contentEditable", "Document API", "Rich Text"]
+                },
+                {
+                    date: "Lunes 24",
+                    title: "Acordeón/Collapse Component",
+                    description: "Crea un componente de acordeón donde solo una sección esté abierta a la vez. Incluye animación suave de expansión/colapso y iconos que rotan.",
+                    difficulty: "facil",
+                    tags: ["Components", "CSS Transitions", "UX"]
+                },
+                {
+                    date: "Jueves 27",
+                    title: "Weather Dashboard",
+                    description: "Crea un dashboard del clima usando una API gratuita (OpenWeather). Muestra temperatura actual, pronóstico 5 días, íconos animados. Permite buscar por ciudad.",
+                    difficulty: "avanzado",
+                    tags: ["Fetch API", "API Integration", "Design"]
+                },
+                {
+                    date: "Viernes 28",
+                    title: "Generador de Gradientes CSS",
+                    description: "Herramienta interactiva para crear gradientes. Permite añadir/remover colores, cambiar ángulo, elegir tipo (linear/radial). Copia código CSS generado.",
+                    difficulty: "medio",
+                    tags: ["CSS Gradients", "Color Picker", "Tools"]
+                },
+                {
+                    date: "Sábado 29",
+                    title: "Sistema de Rating/Estrellas Interactivo",
+                    description: "Crea un sistema de calificación con 5 estrellas. Incluye hover preview, selección al hacer clic, media estrella opcional. Muestra rating promedio y número de votos.",
+                    difficulty: "facil",
+                    tags: ["Interactive", "UX", "Ratings"]
+                },
+                {
+                    date: "Lunes 31",
+                    title: "Reproductor de Música Personalizado",
+                    description: "Diseña un reproductor de audio con play/pause, siguiente/anterior, barra de progreso, volumen. Muestra artwork, título, artista. Incluye visualización de onda de audio.",
+                    difficulty: "avanzado",
+                    tags: ["Audio API", "Canvas", "Media Controls"]
+                }
+            ],
+            abril: [
+                {
+                    date: "Jueves 3",
+                    title: "Cronómetro con Lap Times",
+                    description: "Crea un cronómetro que permita registrar tiempos parciales (laps). Muestra lista de laps, mejor y peor tiempo. Incluye botones de inicio, pausa, reset.",
+                    difficulty: "medio",
+                    tags: ["Time Management", "Arrays", "UI"]
+                },
+                {
+                    date: "Viernes 4",
+                    title: "Tooltip Personalizado",
+                    description: "Implementa tooltips que aparezcan al hacer hover en elementos. Deben posicionarse inteligentemente (arriba/abajo según espacio disponible) y tener delay antes de aparecer.",
+                    difficulty: "medio",
+                    tags: ["Positioning", "Events", "UX Details"]
+                },
+                {
+                    date: "Sábado 5",
+                    title: "Juego de Adivina el Número",
+                    description: "La computadora elige un número (1-100) y das pistas de 'más alto/bajo'. Rastrea intentos, mejor puntuación. Incluye niveles de dificultad (rangos diferentes).",
+                    difficulty: "facil",
+                    tags: ["Game Logic", "Conditionals", "UX Feedback"]
+                },
+                {
+                    date: "Lunes 7",
+                    title: "Progress Bar Animado Multietapa",
+                    description: "Crea una barra de progreso por pasos (ej: 4 pasos de checkout). Muestra paso actual, permite navegar atrás. Incluye animación de llenado y validación de completitud.",
+                    difficulty: "medio",
+                    tags: ["Multi-step Form", "Progress", "Validation"]
+                },
+                {
+                    date: "Jueves 10",
+                    title: "Conversor de Unidades Interactivo",
+                    description: "Herramienta para convertir unidades (temperatura, longitud, peso, moneda). Resultado en tiempo real mientras escribes. Interfaz limpia con selects para unidades.",
+                    difficulty: "medio",
+                    tags: ["Math", "Forms", "Practical Tools"]
+                },
+                {
+                    date: "Viernes 11",
+                    title: "Página de Login con Animaciones",
+                    description: "Diseña una página de login/registro elegante con flip entre formularios, validación, password strength indicator, y animación de 'show password'. Foco en microinteracciones.",
+                    difficulty: "medio",
+                    tags: ["Forms", "Animations", "Security UX"]
+                },
+                {
+                    date: "Sábado 12",
+                    title: "Generador de Avatares Aleatorios",
+                    description: "Crea avatares únicos usando shapes geométricos y colores. Permite generar nuevos con botón, descargar como imagen. Bonus: generar basado en nombre/email (determinístico).",
+                    difficulty: "avanzado",
+                    tags: ["Canvas", "Generative Art", "Download"]
+                },
+                {
+                    date: "Lunes 14",
+                    title: "Infinite Scroll Gallery",
+                    description: "Galería que carga más imágenes al hacer scroll cerca del final. Muestra loading spinner mientras carga. Implementa IntersectionObserver para detectar scroll.",
+                    difficulty: "avanzado",
+                    tags: ["Intersection Observer", "Lazy Load", "Performance"]
+                },
+                {
+                    date: "Jueves 17",
+                    title: "Snake Game Clásico",
+                    description: "Desarrolla el juego de la serpiente. Controla con flechas, come comida, crece, muere si choca. Rastrea puntuación alta. Canvas o grid con divs.",
+                    difficulty: "avanzado",
+                    tags: ["Game Development", "Canvas", "Keyboard"]
+                },
+                {
+                    date: "Viernes 18",
+                    title: "Dashboard con Gráficas",
+                    description: "Crea un dashboard analytics con 3-4 gráficas diferentes (línea, barras, pie). Usa Chart.js o similar. Datos ficticios pero presentación profesional.",
+                    difficulty: "avanzado",
+                    tags: ["Data Visualization", "Charts", "Dashboard"]
+                },
+                {
+                    date: "Sábado 19",
+                    title: "Generador de Memes",
+                    description: "Herramienta para agregar texto superior e inferior a imágenes. Permite subir imagen o elegir de templates. Personaliza fuente, tamaño, color. Descarga resultado.",
+                    difficulty: "medio",
+                    tags: ["Canvas", "File Upload", "Fun Project"]
+                },
+                {
+                    date: "Lunes 21",
+                    title: "Typing Speed Test",
+                    description: "Juego que mide WPM (palabras por minuto) y precisión. Muestra texto a copiar, resalta errores en tiempo real, estadísticas al finalizar. Timer de 60 segundos.",
+                    difficulty: "medio",
+                    tags: ["Input Events", "Performance", "Gamification"]
+                },
+                {
+                    date: "Jueves 24",
+                    title: "Notas con Markdown Preview",
+                    description: "App de notas que muestre preview de Markdown en tiempo real (lado a lado o toggle). Guarda en localStorage. Incluye sintaxis básica: headers, bold, italic, links, listas.",
+                    difficulty: "avanzado",
+                    tags: ["Markdown", "Split View", "LocalStorage"]
+                },
+                {
+                    date: "Viernes 25",
+                    title: "Expense Tracker Personal",
+                    description: "Rastrea ingresos y gastos. Categoriza (comida, transporte, etc), muestra balance total, gráfica de gastos por categoría. Filtra por fecha. Guarda datos localmente.",
+                    difficulty: "avanzado",
+                    tags: ["Finance App", "CRUD", "Charts"]
+                },
+                {
+                    date: "Sábado 26",
+                    title: "Página 404 Creativa e Interactiva",
+                    description: "Diseña una página 404 memorable: animación, juego mini (ej: laberinto simple), o efecto interactivo. Incluye búsqueda y links útiles. Haz que sea una experiencia positiva.",
+                    difficulty: "medio",
+                    tags: ["Creative", "Error Pages", "UX"]
+                },
+                {
+                    date: "Lunes 28",
+                    title: "Particle Effect Background",
+                    description: "Crea un fondo animado con partículas conectadas que respondan al mouse. Usa Canvas. Configurable: número de partículas, velocidad, colores. Optimizado para performance.",
+                    difficulty: "avanzado",
+                    tags: ["Canvas", "Animations", "Interactive Background"]
+                }
+            ]
+        };
+
+        let currentFilter = 'all';
+        let completedSet = new Set(JSON.parse(localStorage.getItem('completedChallenges') || '[]'));
+
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            Object.keys(challenges).forEach(month => {
+                const monthSection = document.createElement('div');
+                monthSection.className = 'month-section';
+
+                const monthTitle = document.createElement('h2');
+                monthTitle.className = 'month-title';
+                monthTitle.textContent = month.charAt(0).toUpperCase() + month.slice(1) + ' 2026';
+                monthSection.appendChild(monthTitle);
+
+                const grid = document.createElement('div');
+                grid.className = 'challenges-grid';
+
+                challenges[month].forEach((challenge, index) => {
+                    const challengeId = `${month}-${index}`;
+                    const isCompleted = completedSet.has(challengeId);
+
+                    // Aplicar filtros
+                    if (currentFilter !== 'all') {
+                        if (currentFilter === 'completed' && !isCompleted) return;
+                        if (currentFilter !== 'completed' && challenge.difficulty !== currentFilter) return;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `challenge-card ${isCompleted ? 'completed' : ''}`;
+                    card.innerHTML = `
+                        <div class="challenge-header">
+                            <span class="challenge-date">📅 ${challenge.date}</span>
+                            <span class="challenge-difficulty difficulty-${challenge.difficulty}">
+                                ${challenge.difficulty}
+                            </span>
+                        </div>
+                        <h3 class="challenge-title">${challenge.title}</h3>
+                        <p class="challenge-description">${challenge.description}</p>
+                        <div class="challenge-tags">
+                            ${challenge.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                        </div>
+                        <input type="checkbox" class="checkbox" ${isCompleted ? 'checked' : ''} 
+                               onchange="toggleComplete('${challengeId}')">
+                    `;
+
+                    grid.appendChild(card);
+                });
+
+                monthSection.appendChild(grid);
+                calendar.appendChild(monthSection);
+            });
+
+            updateStats();
+        }
+
+        function toggleComplete(challengeId) {
+            if (completedSet.has(challengeId)) {
+                completedSet.delete(challengeId);
+            } else {
+                completedSet.add(challengeId);
+            }
+            localStorage.setItem('completedChallenges', JSON.stringify([...completedSet]));
+            renderCalendar();
+        }
+
+        function updateStats() {
+            let total = 0;
+            Object.values(challenges).forEach(month => {
+                total += month.length;
+            });
+
+            const completed = completedSet.size;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('totalChallenges').textContent = total;
+            document.getElementById('completedChallenges').textContent = completed;
+            document.getElementById('progressPercentage').textContent = percentage + '%';
+        }
+
+        function filterChallenges(filter) {
+            currentFilter = filter;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderCalendar();
+        }
+
+        // Inicializar
+        renderCalendar();
+    </script>
+</body>
+</html>
